@@ -103,8 +103,12 @@ def create_report(site_name, cluster_info, highlight_colors, image, segmented_im
 
     # ENGIE Branding
     pdf.set_text_color(0, 51, 102)  # ENGIE Blue
-    pdf.cell(200, 10, txt="ENGIE-TRIKALA Image Segmentation Report", ln=0, align='C')
-    pdf.cell(200, 80, txt=site_name, ln=True, align='C')
+    # pdf.cell(200, 10, txt="ENGIE-TRIKALA Image Segmentation Report", ln=0, align='C')
+    # pdf.cell(200, 80, txt=site_name, ln=True, align='C')
+
+    pdf.multi_cell(200, 10, f"{site_name}\nENGIE-TRIKALA Image Segmentation Report", border = 0, 
+                align = 'C', fill = False)
+    
     pdf.set_text_color(0, 0, 0)  # Black
 
     # Add Images
