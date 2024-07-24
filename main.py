@@ -17,6 +17,9 @@ API_KEY = os.getenv('GMAPS_API_KEY')
 site = "Dublin High School"
 address = "37.7199513,-121.9240798"
 
+# site = "Westmont High School"
+# address = "37.2713745,-121.9876781"
+
 def get_address(address, map_type):
     encoded_address = urllib.parse.quote(address)
     url = f"https://maps.googleapis.com/maps/api/staticmap?center={encoded_address}&zoom=17&size=800x800&maptype={map_type}&key={API_KEY}"
@@ -102,7 +105,7 @@ def create_report(site_name, cluster_info, highlight_colors, image, segmented_im
     pdf.set_font("Arial", size=12)
 
     # ENGIE Branding
-    pdf.set_text_color(0, 51, 102)  # ENGIE Blue
+    pdf.set_text_color(0, 51, 102)  # ENGIE blue
     # pdf.cell(200, 10, txt="ENGIE-TRIKALA Image Segmentation Report", ln=0, align='C')
     # pdf.cell(200, 80, txt=site_name, ln=True, align='C')
 
