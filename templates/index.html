@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ENGIE Image Segmentation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* ENGIE Branding Colors */
+        .engie-blue {
+            color: #005b96;
+        }
+        .engie-light-blue {
+            color: #a9d6e5;
+        }
+        .engie-dark-blue {
+            color: #003f63;
+        }
+        .engie-bg-blue {
+            background-color: #005b96;
+        }
+        .engie-bg-light-blue {
+            background-color: #a9d6e5;
+        }
+        .engie-bg-dark-blue {
+            background-color: #003f63;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100 text-gray-800">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow py-4">
+            <div class="container mx-auto flex justify-between items-center px-4">
+                <h1 class="text-3xl font-bold engie-blue">ENGIE-TRIKALA Image Segmentation</h1>
+                <nav>
+                    <a href="#" class="text-lg engie-blue mx-4">Home</a>
+                    <a href="#" class="text-lg engie-blue mx-4">About</a>
+                    <a href="#" class="text-lg engie-blue mx-4">Contact</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="flex-grow container mx-auto px-4 py-8">
+            <!-- Input Section -->
+            <section class="bg-white shadow rounded-lg p-6 mb-8">
+                <h2 class="text-2xl font-semibold engie-dark-blue mb-4">Enter Site Details</h2>
+                <form method="POST">
+                    <label for="site" class="block text-sm font-medium text-gray-700">Site Name:</label>
+                    <input value="Dublin High School" type="text" id="site" name="site" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#005b96] focus:border-[#005b96] sm:text-sm">
+                    <label for="address" class="block text-sm font-medium text-gray-700 mt-4">Coordinates:</label>
+                    <input value="37.7199513,-121.9240798" type="text" id="address" name="address" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#005b96] focus:border-[#005b96] sm:text-sm">
+                    <label for="num_clusters" class="block text-sm font-medium text-gray-700 mt-4">Number of Clusters:</label>
+                    <input type="number" id="num_clusters" name="num_clusters" value="3" required class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-[#005b96] focus:border-[#005b96] sm:text-sm disabled:opacity-55" disabled>
+                    <input type="submit" value="Segment Image" class="mt-4 bg-[#005b96] text-white py-2 px-4 rounded-md">
+                </form>
+            </section>
+        </main>
+
+        <!-- Footer -->
+        <footer class="bg-[#005b96] text-white py-4">
+            <div class="container mx-auto px-4 text-center">
+                <p>&copy; 2024 ENGIE. All rights reserved.</p>
+            </div>
+        </footer>
+    </div>
+</body>
+
+</html>
