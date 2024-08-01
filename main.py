@@ -102,18 +102,18 @@ class ImageSegmentation:
             'average_color_name': self.closest_color(tuple(avg_color))
         }
 
-    def create_report(self, cluster_info):
+    def create_report(self, cluster_info, identifier):
         now = datetime.datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
         pdf = FPDF()
         pdf.add_page()
         pdf.set_font("Arial", size=12)
 
-        # engie branding
-        pdf.set_text_color(0, 51, 102)  # engie blue
+        # ENGIE branding
+        pdf.set_text_color(0, 51, 102)  # ENGIE blue
         pdf.multi_cell(200, 10, f"{self.site_name}\nENGIE-TRIKALA Image Segmentation Report", border=0, align='C', fill=False)
         pdf.set_text_color(0, 0, 0)  # black
 
-        # add images
+        # Add images
         self.image.save('static/img/original_image.png')
         segmented_img_pil = Image.fromarray(self.segmented_img)
         segmented_img_pil.save('static/img/segmented_image.png')
@@ -127,7 +127,7 @@ class ImageSegmentation:
         pdf.image('static/img/segmented_image.png', x=110, y=40, w=90)
         pdf.ln(100)
         pdf.cell(90, 10, txt="Highlighted Segments", ln=False, align='C')
-        pdf.cell(90, 10, txt="Overlay Image", ln=True, align='C')
+        # pdf.cell(90, 10, txt="Overlay Image", ln=True, align='C')
         pdf.image('static/img/highlighted_image.png', x=10, y=140, w=90)
         
         pdf.add_page()
@@ -146,6 +146,11 @@ class ImageSegmentation:
         pdf.cell(30, 10, 'Label Color', 1)
         pdf.ln(10)
 
+        greenspace_coverage = 0
+        brightness_values = []
+        urban_areas = 0
+        total_pixels = sum(info['size'] for info in cluster_info.values())
+
         for label, info in cluster_info.items():
             highlight_color = self.highlight_colors[info['cluster_num']].astype(int)
             pdf.cell(40, 10, label.capitalize(), 1)
@@ -155,12 +160,105 @@ class ImageSegmentation:
             pdf.cell(30, 10, self.closest_color(tuple(highlight_color)), 1)
             pdf.ln(10)
 
-        # save pdf
+            # Calculate greenspace coverage
+            if label.lower() == 'greenery':
+                greenspace_coverage += info['percentage']
+
+            # Calculate brightness values
+            avg_color = info['average_color']
+            brightness = (0.299 * avg_color[0] + 0.587 * avg_color[1] + 0.114 * avg_color[2])
+            brightness_values.append(brightness)
+
+            # Calculate urban area coverage
+            if label.lower() in ['road', 'campus']:
+                urban_areas += info['size']
+
+        avg_brightness = np.mean(brightness_values)
+        urban_area_percentage = (urban_areas / total_pixels) * 100
+
+        # Urban Heat Island Effect Analysis
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.set_text_color(0, 51, 102)
+        pdf.cell(200, 10, txt="Urban Heat Island Effect Analysis", ln=True, align='C')
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", size=10)
+        pdf.ln(10)
+        pdf.multi_cell(0, 10, "The urban heat island effect is a phenomenon where urban areas experience higher temperatures than their rural surroundings. This effect is mainly due to human activities. The segmentation results indicate that areas classified as 'road' and 'campus' could contribute to higher heat retention. The presence of 'greenery' helps mitigate this effect by providing cooling through evapotranspiration.")
+        pdf.ln(5)
+        pdf.cell(40, 10, f"Urban Area Coverage: {urban_area_percentage:.2f}%", ln=True)
+
+        # Greenspace Coverage Analysis
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.set_text_color(0, 51, 102)
+        pdf.cell(200, 10, txt="Greenspace Coverage Analysis", ln=True, align='C')
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", size=10)
+        pdf.ln(10)
+        pdf.multi_cell(0, 10, f"Greenspace coverage is essential for maintaining ecological balance and providing recreational areas for urban residents. The analysis shows that the greenspace coverage is {greenspace_coverage:.2f}%. Increasing greenspace can provide significant environmental benefits, including temperature regulation and improved air quality.")
+        
+        if greenspace_coverage < 20:
+            pdf.ln(5)
+            pdf.multi_cell(0, 10, "Warning: The greenspace coverage is below the recommended threshold for urban areas. Consider implementing strategies to increase greenspace.")
+
+        # Solar Reflectance Index (SRI) Analysis
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.set_text_color(0, 51, 102)
+        pdf.cell(200, 10, txt="Solar Reflectance Index (SRI) Analysis", ln=True, align='C')
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", size=10)
+        pdf.ln(10)
+        pdf.multi_cell(0, 10, f"The Solar Reflectance Index (SRI) measures the ability of a surface to reflect solar heat. A higher SRI indicates a cooler surface. The average brightness value for the segmented areas is {avg_brightness:.2f}. Surfaces with higher brightness values contribute to lower surface temperatures, helping to reduce the urban heat island effect.")
+        
+        if avg_brightness < 128:
+            pdf.ln(5)
+            pdf.multi_cell(0, 10, "The average brightness is relatively low. Consider using materials with higher reflectance to reduce heat absorption.")
+
+        # Detailed Cluster Analysis
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.set_text_color(0, 51, 102)
+        pdf.cell(200, 10, txt="Detailed Cluster Analysis", ln=True, align='C')
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", size=10)
+        pdf.ln(10)
+        for label, info in cluster_info.items():
+            pdf.set_font("Arial", size=10, style='B')
+            pdf.cell(200, 10, txt=f"{label.capitalize()} (Cluster {info['cluster_num'] + 1})", ln=True)
+            pdf.set_font("Arial", size=10)
+            pdf.cell(50, 10, txt=f"Size: {info['size']} pixels", ln=True)
+            pdf.cell(50, 10, txt=f"Percentage: {info['percentage']:.2f}%", ln=True)
+            pdf.cell(50, 10, txt=f"Average Color: {info['average_color_name']} ({info['average_color']})", ln=True)
+            pdf.cell(50, 10, txt=f"Label Color: {self.closest_color(tuple(self.highlight_colors[info['cluster_num']].astype(int)))}", ln=True)
+            pdf.ln(5)
+
+            if label.lower() == 'road':
+                pdf.multi_cell(0, 10, "Roads contribute to the urban heat island effect by absorbing heat. Consider using materials with higher reflectance for road surfaces.")
+            elif label.lower() == 'campus':
+                pdf.multi_cell(0, 10, "Campus areas typically include buildings and paved surfaces. Increasing tree coverage and green roofs can help mitigate heat absorption.")
+            elif label.lower() == 'greenery':
+                pdf.multi_cell(0, 10, "Greenery areas provide cooling effects through shade and evapotranspiration. Maintain and expand these areas to enhance environmental benefits.")
+            pdf.ln(10)
+
+        # Additional Insights
+        pdf.add_page()
+        pdf.set_font("Arial", size=12)
+        pdf.set_text_color(0, 51, 102)
+        pdf.cell(200, 10, txt="Additional Insights", ln=True, align='C')
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Arial", size=10)
+        pdf.ln(10)
+        pdf.multi_cell(0, 10, "Further analysis can include evaluating the impact of different surface materials on environmental factors, analyzing the spatial distribution of greenspace, and assessing the potential for renewable energy installations based on surface reflectance properties.")
+
+        # Save PDF
         os.makedirs('reports', exist_ok=True)
-        # pdf_output_path = f"reports/ENGIE-TRIKALA-{self.site_name.replace(' ', '-')}-{now}-report.pdf"
-        pdf_output_path = f"reports/ENGIE-TRIKALA-{self.site_name.replace(' ', '-')}-report.pdf"
+        pdf_output_path = f"reports/ENGIE-TRIKALA-{self.site_name.replace(' ', '-')}-{identifier}-report.pdf"
         pdf.output(pdf_output_path)
         print(f"Report saved to {pdf_output_path}")
+
+
 
 if __name__ == "__main__":
     # load environment variables
